@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, "data.json");
 
 app.use(cors());
@@ -47,10 +47,6 @@ function cleanText(value = "") {
   return String(value).trim();
 }
 
-function isTikTokUrl(url = "") {
-  return /^https?:\/\/(www\.)?(vm\.)?tiktok\.com\/.+/i.test(String(url).trim());
-}
-
 function isImageUrl(url = "") {
   const v = String(url).trim();
   if (!v) return true;
@@ -59,6 +55,26 @@ function isImageUrl(url = "") {
 
 function roleAllowedToPost(roles = []) {
   return roles.includes("owner") || roles.includes("admin") || roles.includes("vip") || roles.includes("editor");
+}
+
+function extractStreamableId(url = "") {
+  const value = String(url).trim();
+
+  const patterns = [
+    /streamable\.com\/(?:e\/|o\/)?([a-zA-Z0-9]+)/i,
+    /streamable\.com\/s\/([a-zA-Z0-9]+)/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = value.match(pattern);
+    if (match && match[1]) return match[1];
+  }
+
+  return "";
+}
+
+function isStreamableUrl(url = "") {
+  return !!extractStreamableId(url);
 }
 
 function publicUser(user) {
@@ -257,17 +273,19 @@ app.post("/api/users/:username/edits", async (req, res) => {
     return res.status(403).json({ error: "ვიდეოს დამატება მხოლოდ ედითორს/VIP-ს შეუძლია" });
   }
 
-  const title = cleanText(req.body.title || "TikTok Edit").slice(0, 80);
-  const tiktokUrl = cleanText(req.body.tiktokUrl);
+  const title = cleanText(req.body.title || "Streamable Edit").slice(0, 80);
+  const streamableUrl = cleanText(req.body.streamableUrl);
+  const streamableId = extractStreamableId(streamableUrl);
 
-  if (!isTikTokUrl(tiktokUrl)) {
-    return res.status(400).json({ error: "ჩასვი სწორი TikTok ლინკი" });
+  if (!streamableId) {
+    return res.status(400).json({ error: "ჩასვი სწორი Streamable ლინკი" });
   }
 
   const edit = {
     id: Date.now().toString(),
     title,
-    tiktokUrl,
+    streamableUrl,
+    streamableId,
     createdAt: new Date().toISOString()
   };
 
@@ -295,6 +313,9 @@ app.delete("/api/users/:username/edits/:editId", async (req, res) => {
   res.json({ ok: true });
 });
 
+app.listen(PORT, () => {
+  console.log(`EditZone running on http://localhost:${PORT}`);
+});
 
 
 app.listen(PORT, () => {

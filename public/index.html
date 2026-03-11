@@ -46,7 +46,7 @@
       box-shadow:0 10px 30px rgba(34,211,238,.18);
     }
 
-    .btn,.pill,.smallBtn,.iconBtn,button{transition:.18s ease}
+    .btn,.pill,.smallBtn,button{transition:.18s ease}
     .btn{
       height:40px;padding:0 12px;border-radius:14px;
       background:rgba(255,255,255,.06);
@@ -55,7 +55,7 @@
       display:flex;align-items:center;gap:10px;
       user-select:none;white-space:nowrap;
     }
-    .btn:hover,.pill:hover,.smallBtn:hover,.iconBtn:hover,button:hover{
+    .btn:hover,.pill:hover,.smallBtn:hover,button:hover{
       transform:translateY(-1px);box-shadow:var(--shadow)
     }
     .dot{
@@ -247,10 +247,22 @@
       background:rgba(255,255,255,.05)
     }
 
+    .playerWrap{
+      width:100%;
+      aspect-ratio:16/9;
+      border-radius:16px;
+      overflow:hidden;
+      background:#000;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .playerWrap iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+    }
+
     .editMeta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .hidden{display:none!important}
-    iframe{width:100%;height:520px;border:none;border-radius:16px;background:#000}
-    @media(max-width:700px){iframe{height:430px}.banner{height:220px}}
   </style>
 </head>
 
@@ -298,7 +310,7 @@
         <div class="sp"></div>
         <button class="secondary" id="doLogin">შესვლა</button>
 
-        <div class="note">ვიდეო იტვირთება TikTok ლინკით. წევრი ვერ დაამატებს ედითს, ედითორი კი დაამატებს.</div>
+        <div class="note">ვიდეო ჯერ ატვირთე Streamable-ზე და მერე მისი ლინკი ჩასვი აქ.</div>
       </div>
 
       <div id="authActions" style="display:none">
@@ -334,18 +346,18 @@
 
   <div class="modal" id="upModal">
     <div class="m">
-      <div class="mhead"><b>TikTok ედითის დამატება</b><div class="x" id="closeUp">✕</div></div>
+      <div class="mhead"><b>Streamable ედითის დამატება</b><div class="x" id="closeUp">✕</div></div>
 
       <b>სათაური</b>
       <div class="sp"></div>
-      <input id="editTitleInput" placeholder="მაგ: My New Edit" />
+      <input id="editTitleInput" placeholder="მაგ: New Edit" />
 
       <div class="sp"></div>
-      <b>TikTok ლინკი</b>
+      <b>Streamable ლინკი</b>
       <div class="sp"></div>
-      <input id="tiktokInput" placeholder="https://www.tiktok.com/..." />
+      <input id="streamableInput" placeholder="https://streamable.com/xxxxx" />
 
-      <div class="note">ჩასვი სრული TikTok ლინკი.</div>
+      <div class="note">სრულად ჩასვი Streamable ლინკი.</div>
       <div class="sp"></div>
       <button class="primary" id="saveEdit">დამატება</button>
     </div>

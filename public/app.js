@@ -9,11 +9,8 @@ function getToken() {
 }
 
 function setToken(token) {
-  if (token) {
-    localStorage.setItem("editzone_token", token);
-  } else {
-    localStorage.removeItem("editzone_token");
-  }
+  if (token) localStorage.setItem("editzone_token", token);
+  else localStorage.removeItem("editzone_token");
 }
 
 function esc(s = "") {
@@ -101,7 +98,7 @@ function openUpload() {
     return alert("ვიდეოს დამატება მხოლოდ ედითორს/VIP-ს შეუძლია.");
   }
   $("editTitleInput").value = "";
-  $("tiktokInput").value = "";
+  $("streamableInput").value = "";
   $("upModal").style.display = "flex";
 }
 
@@ -174,14 +171,39 @@ async function getSession() {
   $("authActions").style.display = me ? "block" : "none";
 }
 
-function extractTikTokId(url = "") {
-  const match = String(url).match(/\/video\/(\d+)/);
-  return match ? match[1] : "";
+function extractStreamableId(url = "") {
+  const patterns = [
+    /streamable\.com\/(?:e\/|o\/)?([a-zA-Z0-9]+)/i,
+    /streamable\.com\/s\/([a-zA-Z0-9]+)/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = String(url).match(pattern);
+    if (match && match[1]) return match[1];
+  }
+
+  return "";
 }
 
-function tiktokEmbedUrl(url) {
-  const id = extractTikTokId(url);
-  return id ? `https://www.tiktok.com/embed/v2/${id}` : "";
+function streamableEmbedUrl(url = "") {
+  const id = extractStreamableId(url);
+  return id ? `https://streamable.com/o/${id}` : "";
+}
+
+function renderPlayer(url = "") {
+  const embed = streamableEmbedUrl(url);
+  if (!embed) return `<div class="note">Streamable ვიდეო ვერ ჩაიტვირთა.</div>`;
+
+  return `
+    <div class="playerWrap">
+      <iframe
+        src="${embed}"
+        allowfullscreen
+        scrolling="no"
+        referrerpolicy="strict-origin-when-cross-origin">
+      </iframe>
+    </div>
+  `;
 }
 
 async function renderEditors() {
@@ -243,7 +265,7 @@ async function renderEdits() {
   $("app").innerHTML = `
     <div class="title">
       <h1>ედითები</h1>
-      <div class="muted">აქ ჩანს ყველა დამატებული TikTok ედითი.</div>
+      <div class="muted">აქ ჩანს ყველა დამატებული Streamable ედითი.</div>
     </div>
 
     <div class="grid">
@@ -253,18 +275,13 @@ async function renderEdits() {
             <div class="card">
               <div class="row" style="align-items:flex-start">
                 <div style="min-width:0">
-                  <div class="name">${esc(it.title || "TikTok Edit")} <span class="b editor">${esc(it.ownerUsername)}</span></div>
+                  <div class="name">${esc(it.title || "Streamable Edit")} <span class="b editor">${esc(it.ownerUsername)}</span></div>
                 </div>
                 <a class="link" data-p="${esc(it.ownerUsername)}">პროფილი</a>
               </div>
 
               <div style="height:10px"></div>
-
-              ${
-                extractTikTokId(it.tiktokUrl)
-                  ? `<iframe src="${tiktokEmbedUrl(it.tiktokUrl)}" allowfullscreen></iframe>`
-                  : `<div class="note">TikTok embed ვერ ჩაიტვირთა.</div>`
-              }
+              ${renderPlayer(it.streamableUrl)}
             </div>
           `).join("")
           : `<div class="card">ჯერ ედითი არ არის.</div>`
@@ -297,7 +314,7 @@ async function renderProfile(username) {
           </div>
 
           <div class="pRight">
-            ${canPost ? `<div class="smallBtn primary" id="openUploadBtn">TikTok ედითის დამატება</div>` : ""}
+            ${canPost ? `<div class="smallBtn primary" id="openUploadBtn">Streamable ედითის დამატება</div>` : ""}
             ${meViewing ? `<div class="smallBtn" id="openEditBtn">პროფილის რედაქტირება</div>` : ""}
           </div>
         </div>
@@ -313,14 +330,10 @@ async function renderProfile(username) {
         (u.edits || []).length
           ? u.edits.map((it) => `
             <div class="vcard">
-              ${
-                extractTikTokId(it.tiktokUrl)
-                  ? `<iframe src="${tiktokEmbedUrl(it.tiktokUrl)}" allowfullscreen></iframe>`
-                  : `<div class="note">TikTok embed ვერ ჩაიტვირთა.</div>`
-              }
+              ${renderPlayer(it.streamableUrl)}
 
               <div class="editMeta">
-                <div class="muted">${esc(it.title || "TikTok Edit")}</div>
+                <div class="muted">${esc(it.title || "Streamable Edit")}</div>
                 ${
                   meViewing
                     ? `<button class="danger" style="width:auto;padding:8px 12px" data-del="${it.id}">წაშლა</button>`
@@ -455,15 +468,15 @@ async function saveEdit() {
 
   try {
     const title = $("editTitleInput").value.trim();
-    const tiktokUrl = $("tiktokInput").value.trim();
+    const streamableUrl = $("streamableInput").value.trim();
 
     await api(`/api/users/${encodeURIComponent(me.username)}/edits`, {
       method: "POST",
-      body: JSON.stringify({ title, tiktokUrl })
+      body: JSON.stringify({ title, streamableUrl })
     });
 
     closeUpload();
-    showOk("TikTok ედითი დაემატა");
+    showOk("Streamable ედითი დაემატა");
     await refreshSession();
     await render();
   } catch (err) {
