@@ -318,6 +318,3 @@ app.listen(PORT, () => {
 });
 
 
-app.listen(PORT, () => {
-  console.log(`EditZone running on http://localhost:${PORT}`);
-});
