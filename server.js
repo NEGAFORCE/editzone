@@ -295,7 +295,7 @@ app.delete("/api/users/:username/edits/:editId", async (req, res) => {
   res.json({ ok: true });
 });
 
-const PORT = process.env.PORT || 3000;
+
 
 app.listen(PORT, () => {
   console.log(`EditZone running on http://localhost:${PORT}`);
