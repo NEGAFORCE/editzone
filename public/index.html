@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EditZone Community</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Georgian',system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    :root{
+      --bg1:#050611; --bg2:#070a18;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.12);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --a1:#22d3ee; --a2:#6366f1; --a3:#f472b6;
+      --shadow:0 18px 45px rgba(0,0,0,.40);
+      --danger:rgba(244,63,94,.18); --dangerStroke:rgba(244,63,94,.35);
+      --ok:rgba(16,185,129,.18); --okStroke:rgba(16,185,129,.35);
+    }
+
+    body{
+      min-height:100vh;color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 10% 10%, rgba(99,102,241,.22), transparent 60%),
+        radial-gradient(1000px 650px at 90% 20%, rgba(34,211,238,.18), transparent 55%),
+        radial-gradient(1000px 700px at 40% 95%, rgba(244,114,182,.14), transparent 60%),
+        linear-gradient(180deg,var(--bg1),var(--bg2) 45%,#060812);
+    }
+
+    header{
+      position:sticky;top:0;z-index:20;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 14px;
+      background:rgba(10,12,24,.55);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .logo{display:flex;gap:10px;align-items:center;font-weight:900;letter-spacing:1px}
+    .badgeEZ{
+      width:34px;height:34px;border-radius:12px;
+      background:linear-gradient(45deg,var(--a1),var(--a2));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:1000;
+      box-shadow:0 10px 30px rgba(34,211,238,.18);
+    }
+
+    .btn,.pill,.smallBtn,.iconBtn,button{transition:.18s ease}
+    .btn{
+      height:40px;padding:0 12px;border-radius:14px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--text);cursor:pointer;
+      display:flex;align-items:center;gap:10px;
+      user-select:none;white-space:nowrap;
+    }
+    .btn:hover,.pill:hover,.smallBtn:hover,.iconBtn:hover,button:hover{
+      transform:translateY(-1px);box-shadow:var(--shadow)
+    }
+    .dot{
+      width:28px;height:28px;border-radius:50%;
+      background:linear-gradient(45deg,var(--a3),var(--a2));
+      display:flex;align-items:center;justify-content:center;font-weight:900;
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    .subnav{
+      position:sticky;top:64px;z-index:15;
+      padding:10px 12px;
+      background:rgba(10,12,24,.35);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;gap:10px;flex-wrap:wrap;
+    }
+    .pill{
+      height:38px;padding:0 14px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      cursor:pointer;font-weight:1000;color:rgba(255,255,255,.85);
+      display:flex;align-items:center;gap:8px;
+    }
+    .pill.active{
+      background:linear-gradient(45deg,rgba(34,211,238,.18),rgba(99,102,241,.18));
+      border:1px solid rgba(255,255,255,.18);
+    }
+
+    .wrap{max-width:1120px;margin:16px auto;padding:0 12px}
+    .title{margin:10px 0 12px}
+    .title h1{font-size:18px;font-weight:900}
+    .muted{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.5}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:22px;
+      padding:14px;
+      backdrop-filter:blur(14px);
+    }
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .mini{display:flex;gap:12px;align-items:center;min-width:0}
+    .av{
+      width:48px;height:48px;border-radius:50%;
+      object-fit:cover;background:#0b1223;
+      border:2px solid rgba(255,255,255,.18);
+      flex:0 0 auto;
+    }
+    .name{font-weight:1000;font-size:15px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .meta{color:var(--muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
+    a.link{color:var(--a1);font-weight:1000;cursor:pointer;text-decoration:none}
+
+    .b{
+      font-size:11px;padding:4px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.07);
+      color:rgba(255,255,255,.85);
+      font-weight:1000;
+    }
+    .b.owner{background:linear-gradient(45deg,rgba(244,114,182,.22),rgba(99,102,241,.22))}
+    .b.admin{background:linear-gradient(45deg,rgba(34,211,238,.20),rgba(244,114,182,.16))}
+    .b.vip{background:linear-gradient(45deg,rgba(255,215,0,.16),rgba(244,114,182,.14))}
+    .b.editor{background:rgba(34,211,238,.14)}
+    .b.member{background:rgba(255,255,255,.06)}
+
+    .modal{
+      position:fixed;inset:0;background:rgba(0,0,0,.70);
+      display:none;align-items:center;justify-content:center;
+      padding:14px;z-index:60
+    }
+    .m{
+      width:560px;max-width:95vw;
+      background:rgba(14,18,40,.96);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:22px;padding:14px;
+      backdrop-filter:blur(16px);box-shadow:var(--shadow);
+      max-height:90vh;overflow:auto;
+    }
+    .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .x{
+      width:38px;height:38px;border-radius:14px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.12);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+    }
+
+    input,textarea,select{
+      width:100%;padding:11px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:white;outline:none;
+    }
+    select{
+      background:#2563eb;
+      color:#fff;
+    }
+    select option{
+      background:#2563eb;
+      color:#fff;
+    }
+
+    textarea{min-height:90px;resize:vertical}
+    .sp{height:10px}
+    .note{
+      margin-top:10px;padding:10px 12px;border-radius:16px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+      color:var(--muted);font-size:12px;line-height:1.5;
+    }
+
+    .errbar,.okbar{
+      position:sticky;top:64px;z-index:30;
+      margin:10px 12px;padding:10px 12px;
+      border-radius:16px;display:none;color:rgba(255,255,255,.92);
+    }
+    .errbar{border:1px solid rgba(244,63,94,.35);background:rgba(244,63,94,.12)}
+    .okbar{border:1px solid var(--okStroke);background:var(--ok)}
+
+    button.primary{
+      width:100%;padding:10px 14px;border:none;border-radius:14px;
+      background:linear-gradient(45deg,var(--a1),var(--a2));
+      color:white;font-weight:1000;cursor:pointer;
+    }
+    button.secondary{
+      width:100%;padding:10px 14px;border-radius:14px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--text);font-weight:1000;cursor:pointer;
+    }
+    button.danger{
+      width:100%;padding:10px 14px;border-radius:14px;
+      background:var(--danger);border:1px solid var(--dangerStroke);
+      color:var(--text);font-weight:1000;cursor:pointer;
+    }
+
+    .profileShell{
+      border-radius:26px;overflow:hidden;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04)
+    }
+    .banner{
+      height:270px;position:relative;background-size:cover;background-position:center;
+      background-image:
+        radial-gradient(900px 300px at 10% 30%, rgba(34,211,238,.25), transparent 60%),
+        radial-gradient(900px 300px at 90% 30%, rgba(99,102,241,.25), transparent 60%),
+        linear-gradient(120deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+    }
+    .banner::after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(180deg, rgba(0,0,0,.00), rgba(0,0,0,.86))
+    }
+
+    .profileCard{
+      position:relative;margin:-80px 14px 14px;border-radius:24px;
+      background:rgba(10,12,24,.68);border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(14px);padding:14px;
+    }
+
+    .pTop{
+      display:flex;gap:14px;align-items:flex-end;
+      justify-content:space-between;flex-wrap:wrap;
+    }
+    .pLeft{display:flex;gap:14px;align-items:flex-end;flex:1 1 560px;min-width:260px}
+    .avatarBig{
+      width:84px;height:84px;border-radius:18px;object-fit:cover;background:#0b1223;
+      border:3px solid rgba(255,255,255,.18);flex:0 0 auto;
+    }
+    .pInfo{min-width:220px}
+    .pName{font-size:20px;font-weight:1000;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pBio{
+      margin-top:10px;padding:10px 12px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.82);max-width:640px;white-space:pre-wrap;word-break:break-word;
+    }
+    .pRight{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex:1 1 240px;flex-wrap:wrap}
+    .smallBtn{
+      height:38px;padding:0 14px;border-radius:14px;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+      cursor:pointer;font-weight:1000;display:flex;align-items:center;gap:8px;white-space:nowrap;
+    }
+    .smallBtn.primary{background:linear-gradient(45deg,var(--a1),var(--a2));border:none}
+
+    .videos{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:900px){.videos{grid-template-columns:1fr 1fr}}
+    .vcard{
+      padding:14px;border-radius:22px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05)
+    }
+
+    .editMeta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .hidden{display:none!important}
+    iframe{width:100%;height:520px;border:none;border-radius:16px;background:#000}
+    @media(max-width:700px){iframe{height:430px}.banner{height:220px}}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo"><div class="badgeEZ">EZ</div>EDITZONE COMMUNITY</div>
+    <div class="btn" id="btnAuth">
+      <div class="dot">👤</div>
+      <div id="authLabel">შესვლა / რეგისტრაცია</div>
+    </div>
+  </header>
+
+  <div class="subnav">
+    <div class="pill active" id="navEditors">ედითორები</div>
+    <div class="pill" id="navEdits">ედითები</div>
+  </div>
+
+  <div class="errbar" id="errbar"></div>
+  <div class="okbar" id="okbar"></div>
+
+  <div class="wrap" id="app"></div>
+
+  <div class="modal" id="authModal">
+    <div class="m">
+      <div class="mhead"><b>ანგარიში</b><div class="x" id="closeAuth">✕</div></div>
+
+      <div id="authForms">
+        <b style="display:block;margin-bottom:8px">რეგისტრაცია</b>
+        <input id="regUser" placeholder="იუზერნეიმი" />
+        <div class="sp"></div>
+        <input id="regPass" type="password" placeholder="პაროლი (მინ. 4 სიმბოლო)" />
+        <div class="sp"></div>
+        <select id="regRole">
+          <option value="editor">ედითორი</option>
+          <option value="member">წევრი</option>
+        </select>
+        <div class="sp"></div>
+        <button class="primary" id="doReg">რეგისტრაცია</button>
+
+        <div class="sp"></div>
+        <b style="display:block;margin-bottom:8px">შესვლა</b>
+        <input id="loginUser" placeholder="იუზერნეიმი" />
+        <div class="sp"></div>
+        <input id="loginPass" type="password" placeholder="პაროლი" />
+        <div class="sp"></div>
+        <button class="secondary" id="doLogin">შესვლა</button>
+
+        <div class="note">ვიდეო იტვირთება TikTok ლინკით. წევრი ვერ დაამატებს ედითს, ედითორი კი დაამატებს.</div>
+      </div>
+
+      <div id="authActions" style="display:none">
+        <button class="secondary" id="goMyProfile">პროფილი</button>
+        <div class="sp"></div>
+        <button class="danger" id="logout">გამოსვლა</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="editModal">
+    <div class="m">
+      <div class="mhead"><b>პროფილის რედაქტირება</b><div class="x" id="closeEdit">✕</div></div>
+
+      <b>პროფილის ფოტოს ლინკი</b>
+      <div class="sp"></div>
+      <input id="avatarInput" placeholder="https://..." />
+
+      <div class="sp"></div>
+      <b>ბანერის ლინკი</b>
+      <div class="sp"></div>
+      <input id="bannerInput" placeholder="https://..." />
+
+      <div class="sp"></div>
+      <b>BIO</b>
+      <div class="sp"></div>
+      <textarea id="bioInput" placeholder="შენი BIO..."></textarea>
+
+      <div class="sp"></div>
+      <button class="primary" id="saveProfile">შენახვა</button>
+    </div>
+  </div>
+
+  <div class="modal" id="upModal">
+    <div class="m">
+      <div class="mhead"><b>TikTok ედითის დამატება</b><div class="x" id="closeUp">✕</div></div>
+
+      <b>სათაური</b>
+      <div class="sp"></div>
+      <input id="editTitleInput" placeholder="მაგ: My New Edit" />
+
+      <div class="sp"></div>
+      <b>TikTok ლინკი</b>
+      <div class="sp"></div>
+      <input id="tiktokInput" placeholder="https://www.tiktok.com/..." />
+
+      <div class="note">ჩასვი სრული TikTok ლინკი.</div>
+      <div class="sp"></div>
+      <button class="primary" id="saveEdit">დამატება</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
